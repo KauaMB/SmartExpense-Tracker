@@ -175,3 +175,5 @@ artifacts/
 
 # Publish output
 publish/
+
+.aider*

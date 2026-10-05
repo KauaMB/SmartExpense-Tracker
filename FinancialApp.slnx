@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/CoreService/">
+    <Project Path="CoreService/CoreService.API/CoreService.API.csproj" />
+    <Project Path="CoreService/CoreService.Application/CoreService.Application.csproj" />
+    <Project Path="CoreService/CoreService.Domain/CoreService.Domain.csproj" />
+    <Project Path="CoreService/CoreService.Infrastructure/CoreService.Infrastructure.csproj" />
+  </Folder>
+</Solution>
