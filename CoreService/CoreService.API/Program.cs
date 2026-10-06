@@ -1,4 +1,12 @@
+using CoreService.Infrastructure; // Adicione este using no topo
+
 var builder = WebApplication.CreateBuilder(args);
+
+// --- NOSSA LINHA MÁGICA AQUI ---
+builder.Services.AddInfrastructure(builder.Configuration);
+
+// Add services to the container.
+builder.Services.AddControllers();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
