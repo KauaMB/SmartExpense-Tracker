@@ -1,6 +1,6 @@
 using System;
 
-namespace CoreService.Domain
+namespace CoreService.Domain.Entities
 {
     public class Transaction
     {

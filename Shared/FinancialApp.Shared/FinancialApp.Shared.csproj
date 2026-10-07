@@ -1,10 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\CoreService.Domain\CoreService.Domain.csproj" />
-    <ProjectReference Include="..\..\Shared\FinancialApp.Shared\FinancialApp.Shared.csproj" />
-  </ItemGroup>
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

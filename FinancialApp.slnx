@@ -5,4 +5,7 @@
     <Project Path="CoreService/CoreService.Domain/CoreService.Domain.csproj" />
     <Project Path="CoreService/CoreService.Infrastructure/CoreService.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/Shared/">
+    <Project Path="Shared/FinancialApp.Shared/FinancialApp.Shared.csproj" />
+  </Folder>
 </Solution>
