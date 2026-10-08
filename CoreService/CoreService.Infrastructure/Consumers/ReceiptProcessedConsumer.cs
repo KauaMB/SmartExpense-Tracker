@@ -1,31 +1,47 @@
-﻿using FinancialApp.Shared.Events;
+﻿using CoreService.Domain.Repositories;
+using FinancialApp.Shared.Events;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 
 namespace CoreService.Infrastructure.Consumers;
 
-// A interface IConsumer indica ao MassTransit qual é o evento exato que queremos escutar
 public class ReceiptProcessedConsumer : IConsumer<ReceiptProcessedEvent>
 {
     private readonly ILogger<ReceiptProcessedConsumer> _logger;
+    private readonly ITransactionRepository _transactionRepository;
 
-    public ReceiptProcessedConsumer(ILogger<ReceiptProcessedConsumer> logger)
+    public ReceiptProcessedConsumer(
+        ILogger<ReceiptProcessedConsumer> logger,
+        ITransactionRepository transactionRepository)
     {
         _logger = logger;
+        _transactionRepository = transactionRepository;
     }
 
-    public Task Consume(ConsumeContext<ReceiptProcessedEvent> context)
+    public async Task Consume(ConsumeContext<ReceiptProcessedEvent> context)
     {
         var message = context.Message;
 
-        // Em vez de usar o velho Console.WriteLine, usamos o ILogger, que é a norma no mercado
-        _logger.LogInformation(
-            "OCR Results Received! Transaction: {Id}, Value: {Value}, Store: {MerchantName}",
-            message.TransactionId,
-            message.ExtractedTotal,
-            message.MerchantName ?? "Desconhecido"
-        );
+        _logger.LogInformation("Processing OCR return for Transaction: {Id}", message.TransactionId);
 
-        return Task.CompletedTask;
+        var transaction = await _transactionRepository.GetByIdAsync(message.TransactionId);
+
+        if (transaction == null)
+        {
+            _logger.LogWarning("Transaction {Id} not found in the database. Ignoring event.", message.TransactionId);
+            return;
+        }
+
+        transaction.TotalValue = message.ExtractedTotal;
+        transaction.Establishment = message.MerchantName;
+
+        if (message.ExtractedDate.HasValue)
+        {
+            transaction.CreatedAt = message.ExtractedDate.Value;
+        }
+
+        await _transactionRepository.UpdateAsync(transaction);
+
+        _logger.LogInformation("Transaction {Id} successfully updated in the database!", message.TransactionId);
     }
 }

@@ -1,0 +1,6 @@
+@FinancialApp.OcrService_HostAddress = http://localhost:5062
+
+GET {{FinancialApp.OcrService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
