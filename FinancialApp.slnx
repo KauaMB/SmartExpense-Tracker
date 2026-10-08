@@ -8,9 +8,6 @@
   <Folder Name="/OcrService/">
     <Project Path="OcrService/FinancialApp.OcrService/FinancialApp.OcrService.csproj" />
   </Folder>
-  <Folder Name="/OcrService/Controllers/">
-    <File Path="ReceiptController.cs" />
-  </Folder>
   <Folder Name="/Shared/">
     <Project Path="Shared/FinancialApp.Shared/FinancialApp.Shared.csproj" />
   </Folder>

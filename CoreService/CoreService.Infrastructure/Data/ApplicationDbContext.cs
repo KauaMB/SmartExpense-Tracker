@@ -11,6 +11,8 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Transaction> Transactions { get; set; }
 
+    public DbSet<TransactionItem> TransactionItems { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
