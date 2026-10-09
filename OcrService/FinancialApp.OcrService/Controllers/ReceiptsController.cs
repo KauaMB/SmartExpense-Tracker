@@ -21,30 +21,31 @@ public class ReceiptsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> UploadReceipt([FromForm] IFormFile file, [FromForm] Guid transactionId)
+    // Substituímos os dois parâmetros soltos por um único objeto request
+    public async Task<IActionResult> UploadReceipt([FromForm] UploadReceiptRequest request)
     {
-        if (file == null || file.Length == 0) return BadRequest(new { Error = "No image file was uploaded." });
-        if (transactionId == Guid.Empty) return BadRequest(new { Error = "Transaction ID is required." });
+        // Lembre-se de atualizar as chamadas para usar o request!
+        if (request.File == null || request.File.Length == 0) return BadRequest(new { Error = "No image file was uploaded." });
+        if (request.TransactionId == Guid.Empty) return BadRequest(new { Error = "Transaction ID is required." });
 
         try
         {
-            // 1. Recebe o JSON da IA
-            var extractedJson = await _ocrService.ProcessReceiptImageAsync(file);
+            // Passamos o request.File para o serviço da IA
+            var extractedJson = await _ocrService.ProcessReceiptImageAsync(request.File);
 
-            // 2. Faz o parsing do JSON para uma estrutura temporária[cite: 8]
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             var ocrResult = JsonSerializer.Deserialize<OcrResponseTemp>(extractedJson, options);
 
-            // 3. Monta o evento oficial da nossa arquitetura com a lista de itens[cite: 8]
+            if (ocrResult == null) return StatusCode(500, "Falha ao interpretar o JSON da IA");
+
             var receiptEvent = new ReceiptProcessedEvent(
-                transactionId,
+                request.TransactionId, // Aqui também usa o request
                 ocrResult.TotalValue,
                 ocrResult.MerchantName,
                 DateTime.TryParse(ocrResult.Date, out var parsedDate) ? parsedDate : null,
                 ocrResult.Items ?? new List<TransactionItemDto>()
             );
 
-            // 4. Publica o evento no RabbitMQ[cite: 8]
             await _publishEndpoint.Publish(receiptEvent);
 
             return Ok(new
@@ -66,5 +67,11 @@ public class ReceiptsController : ControllerBase
         public decimal TotalValue { get; set; }
         public string Date { get; set; }
         public List<TransactionItemDto> Items { get; set; }
+    }
+
+    public class UploadReceiptRequest
+    {
+        public IFormFile File { get; set; }
+        public Guid TransactionId { get; set; }
     }
 }

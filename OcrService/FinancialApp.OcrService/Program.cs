@@ -1,9 +1,12 @@
+using FinancialApp.OcrService.Services;
 using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. ADICIONE ESTA LINHA: Ensina a aplicação a usar Controllers
 builder.Services.AddControllers();
+
+builder.Services.AddHttpClient<GeminiOcrService>();
 
 // Adiciona o Swagger para podermos testar a API facilmente
 builder.Services.AddEndpointsApiExplorer();

@@ -8,7 +8,7 @@ public class GeminiOcrService
 {
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
-    private readonly string _apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+    private readonly string _apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent";
 
     // Injetamos o IConfiguration aqui
     public GeminiOcrService(HttpClient httpClient, IConfiguration configuration)
