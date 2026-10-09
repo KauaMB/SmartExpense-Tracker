@@ -32,9 +32,17 @@ public class GeminiOcrService
         var base64Image = Convert.ToBase64String(memoryStream.ToArray());
 
         var prompt = @"Analyze this receipt image. 
-                       Extract the total value (as a number), the merchant name (as text), and the date. 
-                       Return ONLY a valid JSON object exactly like this, without Markdown formatting: 
-                       { ""MerchantName"": ""Name"", ""TotalValue"": 0.00, ""Date"": ""YYYY-MM-DD"" }";
+               Extract the total value (as a number), the merchant name (as text), and the date (YYYY-MM-DD). 
+               Also, extract every single product line by line and classify each one into a logical Category (e.g., Alimentação, Limpeza, Higiene, etc.).
+               Return ONLY a valid JSON object exactly like this, without Markdown formatting: 
+               { 
+                 ""MerchantName"": ""Name"", 
+                 ""TotalValue"": 0.00, 
+                 ""Date"": ""YYYY-MM-DD"",
+                 ""Items"": [
+                   { ""Name"": ""Product Name"", ""Category"": ""Limpeza"", ""Price"": 1.50 }
+                 ]
+               }";
 
         var requestBody = new
         {

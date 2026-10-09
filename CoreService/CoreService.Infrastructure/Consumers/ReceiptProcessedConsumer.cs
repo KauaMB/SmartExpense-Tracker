@@ -1,4 +1,5 @@
-﻿using CoreService.Domain.Repositories;
+﻿using CoreService.Domain.Entities;
+using CoreService.Domain.Interfaces;
 using FinancialApp.Shared.Events;
 using MassTransit;
 using Microsoft.Extensions.Logging;
@@ -7,41 +8,63 @@ namespace CoreService.Infrastructure.Consumers;
 
 public class ReceiptProcessedConsumer : IConsumer<ReceiptProcessedEvent>
 {
+    private readonly ITransactionRepository _repository;
     private readonly ILogger<ReceiptProcessedConsumer> _logger;
-    private readonly ITransactionRepository _transactionRepository;
 
-    public ReceiptProcessedConsumer(
-        ILogger<ReceiptProcessedConsumer> logger,
-        ITransactionRepository transactionRepository)
+    public ReceiptProcessedConsumer(ITransactionRepository repository, ILogger<ReceiptProcessedConsumer> logger)
     {
+        _repository = repository;
         _logger = logger;
-        _transactionRepository = transactionRepository;
     }
 
     public async Task Consume(ConsumeContext<ReceiptProcessedEvent> context)
     {
         var message = context.Message;
+        _logger.LogInformation("A processar recibo para a Transação {TransactionId}...", message.TransactionId);
 
-        _logger.LogInformation("Processing OCR return for Transaction: {Id}", message.TransactionId);
-
-        var transaction = await _transactionRepository.GetByIdAsync(message.TransactionId);
+        // 1. Buscar a transação original na base de dados
+        var transaction = await _repository.GetByIdAsync(message.TransactionId);
 
         if (transaction == null)
         {
-            _logger.LogWarning("Transaction {Id} not found in the database. Ignoring event.", message.TransactionId);
+            _logger.LogWarning("Transação {TransactionId} não foi encontrada. Evento ignorado.", message.TransactionId);
             return;
         }
 
+        // 2. Atualizar os dados de cabeçalho da fatura
         transaction.TotalValue = message.ExtractedTotal;
-        transaction.Establishment = message.MerchantName;
+        transaction.MerchantName = message.MerchantName;
 
         if (message.ExtractedDate.HasValue)
         {
-            transaction.CreatedAt = message.ExtractedDate.Value;
+            transaction.OccurredOn = message.ExtractedDate.Value;
         }
 
-        await _transactionRepository.UpdateAsync(transaction);
+        // 3. Iterar sobre a lista de itens recebida (O foreach que a task pede)
+        if (message.Items != null && message.Items.Any())
+        {
+            foreach (var itemDto in message.Items)
+            {
+                var transactionItem = new TransactionItem
+                {
+                    Name = itemDto.Name,
+                    Category = itemDto.Category,
+                    Price = itemDto.Price,
+                    TransactionId = transaction.Id // Vinculamos a chave estrangeira (Foreign Key)
+                };
 
-        _logger.LogInformation("Transaction {Id} successfully updated in the database!", message.TransactionId);
+                // Adiciona o novo produto à lista de itens desta transação específica
+                transaction.Items.Add(transactionItem);
+            }
+        }
+
+        // 4. Salvar as alterações e os novos itens na base de dados
+        await _repository.UpdateAsync(transaction);
+
+        _logger.LogInformation(
+            "Transação {TransactionId} atualizada com sucesso! {ItemCount} produtos categorizados e guardados.",
+            message.TransactionId,
+            message.Items?.Count ?? 0
+        );
     }
 }

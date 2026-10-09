@@ -1,5 +1,5 @@
 ﻿using CoreService.Domain.Entities;
-using CoreService.Domain.Repositories;
+using CoreService.Domain.Interfaces;
 using CoreService.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,6 +1,6 @@
 ﻿using CoreService.Domain.Entities;
 
-namespace CoreService.Domain.Repositories;
+namespace CoreService.Domain.Interfaces;
 
 public interface ITransactionRepository
 {

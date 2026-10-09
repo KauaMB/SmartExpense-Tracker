@@ -1,10 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace FinancialApp.Shared.Events;
 
-namespace FinancialApp.Shared.Events
-{
-    internal class TransactionItemDto
-    {
-    }
-}
+public record TransactionItemDto(string Name, string Category, decimal Price);

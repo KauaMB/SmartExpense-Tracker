@@ -1,4 +1,4 @@
-using CoreService.Domain.Repositories;
+using CoreService.Domain.Interfaces;
 using CoreService.Infrastructure.Data;
 using CoreService.Infrastructure.Repositories;
 using CoreService.Infrastructure.Consumers;
